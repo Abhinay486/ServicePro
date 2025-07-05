@@ -2,7 +2,6 @@ import React from "react";
 import Header from "./Header";
 import HomePage from "./HomePage";
 import ProfessionalsPage from "./ProfessionalsPage";
-import JoinProfessionalPage from "./JoinProfessionalPage";
 import AboutPage from "./AboutPage";
 import LoginModal from "./LoginModal";
 import SignupModal from "./SignupModal";
@@ -24,9 +23,6 @@ const CustomerDashboard = ({
   page,
   filteredProfessionals,
   bookProfessional,
-  professionalFormRef,
-  handleProfessionalSubmit,
-  professionalSuccess,
   showBooking,
   setShowBooking,
   bookingFormRef,
@@ -45,7 +41,11 @@ const CustomerDashboard = ({
       userType={userType}
       onLogout={onLogout}
     />
-    <main className="container">
+    <main className="container" style={{
+      minHeight: 'calc(100vh - 80px)',
+      background: 'linear-gradient(135deg, var(--primary-light) 0%, var(--secondary-light) 100%)',
+      paddingTop: '2rem'
+    }}>
       <HomePage
         searchService={searchService}
         setSearchService={setSearchService}
@@ -58,13 +58,6 @@ const CustomerDashboard = ({
       <ProfessionalsPage
         filteredProfessionals={filteredProfessionals}
         bookProfessional={bookProfessional}
-        page={page}
-      />
-      <JoinProfessionalPage
-        professionalFormRef={professionalFormRef}
-        handleProfessionalSubmit={handleProfessionalSubmit}
-        professionalSuccess={professionalSuccess}
-        showPage={showPage}
         page={page}
       />
       <AboutPage page={page} />

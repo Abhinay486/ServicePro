@@ -35,6 +35,22 @@ const ProfessionalSchema = new mongoose.Schema({
   }]
 });
 
+// Booking schema
+const BookingSchema = new mongoose.Schema({
+  customer: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer', required: true },
+  professional: { type: mongoose.Schema.Types.ObjectId, ref: 'Professional', required: true },
+  date: { type: Date, required: true },
+  time: { type: String, required: true },
+  service: { type: String, required: true },
+  status: { type: String, enum: ['pending', 'confirmed', 'completed', 'cancelled'], default: 'pending' },
+  notes: { type: String },
+  customerAddress: { type: String, required: true },
+  totalAmount: { type: Number },
+  rejectionReason: { type: String },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+});
+
 // Professional Application schema (for admin approval)
 const ProfessionalApplicationSchema = new mongoose.Schema({
   name: { type: String, required: true },
@@ -52,3 +68,4 @@ const ProfessionalApplicationSchema = new mongoose.Schema({
 export const Customer = mongoose.model('Customer', CustomerSchema);
 export const Professional = mongoose.model('Professional', ProfessionalSchema);
 export const ProfessionalApplication = mongoose.model('ProfessionalApplication', ProfessionalApplicationSchema);
+export const Booking = mongoose.model('Booking', BookingSchema);

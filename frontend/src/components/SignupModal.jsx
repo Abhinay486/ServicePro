@@ -41,39 +41,164 @@ const SignupModal = ({ showSignup, setShowSignup }) => {
 
   return showSignup ? (
     <div id="signupModal" className="modal" style={{ display: 'block' }}>
-      <div className="modal-content">
-        <span className="modal-close" onClick={() => setShowSignup(false)}>&times;</span>
-        <h3 style={{ marginBottom: '1.5rem' }}>Sign Up for ServicePro</h3>
+      <div className="modal-content" style={{
+        background: 'rgba(255, 255, 255, 0.95)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid rgba(77, 109, 227, 0.1)',
+        borderRadius: '24px',
+        boxShadow: '0 20px 40px rgba(77, 109, 227, 0.15)',
+        maxWidth: '500px',
+        maxHeight: '80vh',
+        overflowY: 'auto'
+      }}>
+        <span className="modal-close" onClick={() => setShowSignup(false)} style={{ color: '#393737' }}>&times;</span>
+        <h3 style={{ 
+          marginBottom: '1.5rem', 
+          color: '#393737',
+          fontSize: '1.5rem',
+          fontWeight: '600',
+          textAlign: 'center'
+        }}>Sign Up for ServicePro</h3>
         <form id="signupForm" ref={formRef} onSubmit={handleSignup}>
           <div className="form-group">
-            <label htmlFor="signupName">Full Name</label>
-            <input type="text" id="signupName" required />
+            <label htmlFor="signupName" style={{ color: '#393737', fontWeight: '500' }}>Full Name</label>
+            <input 
+              type="text" 
+              id="signupName" 
+              required 
+              style={{
+                border: '2px solid #C7EEFF',
+                borderRadius: '12px',
+                padding: '0.75rem',
+                fontSize: '1rem',
+                background: '#FFFFFF',
+                color: '#393737',
+                transition: 'all 0.3s ease'
+              }}
+              onFocus={(e) => e.target.style.borderColor = '#4D6DE3'}
+              onBlur={(e) => e.target.style.borderColor = '#C7EEFF'}
+            />
           </div>
           <div className="form-group">
-            <label htmlFor="signupEmail">Email</label>
-            <input type="email" id="signupEmail" required />
+            <label htmlFor="signupEmail" style={{ color: '#393737', fontWeight: '500' }}>Email</label>
+            <input 
+              type="email" 
+              id="signupEmail" 
+              required 
+              style={{
+                border: '2px solid #C7EEFF',
+                borderRadius: '12px',
+                padding: '0.75rem',
+                fontSize: '1rem',
+                background: '#FFFFFF',
+                color: '#393737',
+                transition: 'all 0.3s ease'
+              }}
+              onFocus={(e) => e.target.style.borderColor = '#4D6DE3'}
+              onBlur={(e) => e.target.style.borderColor = '#C7EEFF'}
+            />
           </div>
           <div className="form-group">
-            <label htmlFor="signupPassword">Password</label>
-            <input type="password" id="signupPassword" required />
+            <label htmlFor="signupPassword" style={{ color: '#393737', fontWeight: '500' }}>Password</label>
+            <input 
+              type="password" 
+              id="signupPassword" 
+              required 
+              style={{
+                border: '2px solid #C7EEFF',
+                borderRadius: '12px',
+                padding: '0.75rem',
+                fontSize: '1rem',
+                background: '#FFFFFF',
+                color: '#393737',
+                transition: 'all 0.3s ease'
+              }}
+              onFocus={(e) => e.target.style.borderColor = '#4D6DE3'}
+              onBlur={(e) => e.target.style.borderColor = '#C7EEFF'}
+            />
           </div>
           <div className="form-group">
-            <label htmlFor="signupPhone">Phone</label>
-            <input type="tel" id="signupPhone" pattern="[0-9]{10}" title="Please enter a valid 10-digit phone number" required />
+            <label htmlFor="signupPhone" style={{ color: '#393737', fontWeight: '500' }}>Phone</label>
+            <input 
+              type="tel" 
+              id="signupPhone" 
+              pattern="[0-9]{10}" 
+              title="Please enter a valid 10-digit phone number" 
+              required 
+              style={{
+                border: '2px solid #C7EEFF',
+                borderRadius: '12px',
+                padding: '0.75rem',
+                fontSize: '1rem',
+                background: '#FFFFFF',
+                color: '#393737',
+                transition: 'all 0.3s ease'
+              }}
+              onFocus={(e) => e.target.style.borderColor = '#4D6DE3'}
+              onBlur={(e) => e.target.style.borderColor = '#C7EEFF'}
+            />
           </div>
           <div className="form-group">
-            <label htmlFor="signupAddress">Address</label>
-            <input type="text" id="signupAddress" required />
+            <label htmlFor="signupAddress" style={{ color: '#393737', fontWeight: '500' }}>Address</label>
+            <input 
+              type="text" 
+              id="signupAddress" 
+              required 
+              style={{
+                border: '2px solid #C7EEFF',
+                borderRadius: '12px',
+                padding: '0.75rem',
+                fontSize: '1rem',
+                background: '#FFFFFF',
+                color: '#393737',
+                transition: 'all 0.3s ease'
+              }}
+              onFocus={(e) => e.target.style.borderColor = '#4D6DE3'}
+              onBlur={(e) => e.target.style.borderColor = '#C7EEFF'}
+            />
           </div>
           <div className="form-group">
-            <label htmlFor="userType">I am a:</label>
-            <select id="userType" required>
+            <label htmlFor="userType" style={{ color: '#393737', fontWeight: '500' }}>I am a:</label>
+            <select 
+              id="userType" 
+              required 
+              style={{
+                border: '2px solid #C7EEFF',
+                borderRadius: '12px',
+                padding: '0.75rem',
+                fontSize: '1rem',
+                background: '#FFFFFF',
+                color: '#393737',
+                transition: 'all 0.3s ease'
+              }}
+              onFocus={(e) => e.target.style.borderColor = '#4D6DE3'}
+              onBlur={(e) => e.target.style.borderColor = '#C7EEFF'}
+            >
               <option value="">Select user type</option>
               <option value="customer">Customer</option>
               <option value="professional">Professional</option>
             </select>
           </div>
-          <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Sign Up</button>
+          <button 
+            type="submit" 
+            className="btn btn-primary" 
+            style={{ 
+              width: '100%',
+              background: '#4D6DE3',
+              color: '#FFFFFF',
+              border: 'none',
+              padding: '0.875rem',
+              borderRadius: '12px',
+              fontSize: '1rem',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseOver={(e) => e.target.style.background = '#393737'}
+            onMouseOut={(e) => e.target.style.background = '#4D6DE3'}
+          >
+            Sign Up
+          </button>
         </form>
       </div>
     </div>

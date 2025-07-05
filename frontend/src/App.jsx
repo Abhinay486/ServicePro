@@ -130,24 +130,63 @@ function App() {
     }
   };
 
+  // Removed availability checking to simplify booking process
+
   // Booking form submit
-  const handleBookingSubmit = (e) => {
+  const handleBookingSubmit = async (e) => {
     e.preventDefault();
+    
+    // Check if user is logged in as a customer
+    if (!user || userType !== 'customer') {
+      alert('Please log in as a customer to book a service.');
+      setShowLogin(true);
+      return;
+    }
+
     const form = bookingFormRef.current;
     const date = form.bookingDate.value;
     const time = form.bookingTime.value;
-    setBookingSuccess({
-      name: currentBookingProfessional
-        ? currentBookingProfessional.name
-        : "the professional",
-      date,
-      time,
-    });
-    form.reset();
-    setTimeout(() => {
-      setBookingSuccess(null);
-      setShowBooking(false);
-    }, 4000);
+    const serviceDetails = form.serviceDetails.value;
+    const customerAddress = form.customerAddress.value;
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/bookings/request`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          customerId: user.userId,
+          professionalId: currentBookingProfessional._id,
+          date,
+          time,
+          service: serviceDetails,
+          notes: serviceDetails,
+          customerAddress
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setBookingSuccess({
+          name: currentBookingProfessional.name,
+          date,
+          time,
+          message: data.message
+        });
+        form.reset();
+        setTimeout(() => {
+          setBookingSuccess(null);
+          setShowBooking(false);
+        }, 6000);
+      } else {
+        alert(data.error || 'Failed to submit booking request');
+      }
+    } catch (error) {
+      console.error('Error submitting booking:', error);
+      alert('Failed to submit booking request. Please try again.');
+    }
   };
 
   // Book professional
@@ -270,14 +309,13 @@ function App() {
           </main>
           <LoginModal showLogin={showLogin} setShowLogin={setShowLogin} setUser={setUser} setUserType={setUserType} />
           <SignupModal showSignup={showSignup} setShowSignup={setShowSignup} />
-          <BookingModal
-            showBooking={showBooking}
-            setShowBooking={setShowBooking}
-            bookingFormRef={bookingFormRef}
-            handleBookingSubmit={handleBookingSubmit}
-            bookingSuccess={bookingSuccess}
-            currentBookingProfessional={currentBookingProfessional}
-          />
+          <BookingModal          showBooking={showBooking}
+          setShowBooking={setShowBooking}
+          bookingFormRef={bookingFormRef}
+          handleBookingSubmit={handleBookingSubmit}
+          bookingSuccess={bookingSuccess}
+          currentBookingProfessional={currentBookingProfessional}
+        />
         </>
       )}
       {user && userType === "customer" && (
@@ -296,9 +334,6 @@ function App() {
           page={page}
           filteredProfessionals={filteredProfessionals}
           bookProfessional={bookProfessional}
-          professionalFormRef={professionalFormRef}
-          handleProfessionalSubmit={handleProfessionalSubmit}
-          professionalSuccess={professionalSuccess}
           showBooking={showBooking}
           setShowBooking={setShowBooking}
           bookingFormRef={bookingFormRef}

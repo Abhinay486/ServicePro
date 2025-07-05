@@ -15,7 +15,19 @@ const Header = ({ showPage, setShowLogin, setShowSignup, user, onLogout }) => (
       <div className="auth-buttons">
         {user ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <div className="profile-circle" style={{ width: 36, height: 36, borderRadius: '50%', background: '#667eea', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 18 }}>
+            <div className="profile-circle" style={{ 
+              width: 36, 
+              height: 36, 
+              borderRadius: '50%', 
+              background: 'linear-gradient(135deg, #4D6DE3, #393737)', 
+              color: '#FFFFFF', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              fontWeight: 700, 
+              fontSize: 18,
+              border: '2px solid #C7EEFF'
+            }}>
               {user.email ? user.email.charAt(0).toUpperCase() : 'U'}
             </div>
             <button className="btn btn-secondary" onClick={onLogout}>Logout</button>

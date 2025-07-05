@@ -100,10 +100,9 @@ function App() {
         }
       ];
       setProfessionals(samplePros);
-
-      fdhi
       setNextProfessionalId(samplePros.length + 1);
       localStorage.setItem('professionals', JSON.stringify(samplePros));
+      console.log();
     }
   }, []);
 

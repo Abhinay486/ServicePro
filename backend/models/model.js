@@ -6,7 +6,7 @@ const UserBase = {
   email: { type: String, unique: true, required: true },
   passwordHash: { type: String, required: true },
   phone: { type: String, required: true },
-  userType: { type: String, enum: ['customer', 'professional'], required: true },
+  userType: { type: String, enum: ['customer', 'professional', 'admin'], required: true },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 };

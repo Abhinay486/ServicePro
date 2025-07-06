@@ -2,7 +2,14 @@ import dotenv from 'dotenv';
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
-import userRoutes from './routes/userRoutes.js';
+
+// Import organized routes
+import authRoutes from './routes/authRoutes.js';
+import customerRoutes from './routes/customerRoutes.js';
+import professionalRoutes from './routes/professionalRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
+import generalRoutes from './routes/generalRoutes.js';
+import legacyRoutes from './routes/legacyRoutes.js';
 
 dotenv.config();
 
@@ -13,33 +20,27 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-
 // MongoDB connection
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err));
-
-
 
 // Basic route
 app.get('/', (req, res) => {
   res.send('ServicePro backend is running!');
 });
 
-app.use('/api', userRoutes);
+// Organized API routes
+app.use('/api/auth', authRoutes);
+app.use('/api/customers', customerRoutes);
+app.use('/api/professionals', professionalRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api', generalRoutes);
+
+// Legacy routes for backward compatibility
+app.use('/api', legacyRoutes);
 
 // Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Something went wrong!' });
-});
-
-// 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({ error: 'Route not found' });
-});
-
-
 
 // Start server
 app.listen(PORT, () => {

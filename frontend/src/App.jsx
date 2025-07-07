@@ -11,9 +11,27 @@ import SignupModal from "./components/SignupModal";
 import BookingModal from "./components/BookingModal";
 import CustomerDashboard from "./components/CustomerDashboard";
 import ProfessionalDashboard from "./components/ProfessionalDashboard";
+import AdminDashboard from "./components/AdminDashboard";
 import ToastProvider from "./components/ToastProvider";
 import { toast } from "react-hot-toast";
 import "./App.css";
+
+// Helper to decode JWT payload without external libraries
+function decodeJwtPayload(token) {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch {
+    return null;
+  }
+}
 
 function App() {
   // State for navigation and professionals
@@ -32,6 +50,7 @@ function App() {
   const [categoryFilter, setCategoryFilter] = useState(null);
   const [user, setUser] = useState(null);
   const [userType, setUserType] = useState(null);
+  const [token, setToken] = useState(null);
 
   // Refs for forms
   const professionalFormRef = useRef();
@@ -130,7 +149,7 @@ function App() {
     }
   };
 
-  // Removed availability checking to simplify booking process
+  
 
   // Booking form submit
   const handleBookingSubmit = async (e) => {
@@ -207,12 +226,37 @@ function App() {
     setPage("professionals");
   };
 
-  // Logout handler
+  // On login, store token in localStorage and set user/userType
+  const handleLoginSuccess = (userObj, userTypeVal, jwtToken) => {
+    setUser(userObj);
+    setUserType(userTypeVal);
+    setToken(jwtToken);
+    localStorage.setItem("servicepro_jwt_token", jwtToken);
+  };
+
+  // On logout, clear everything
   const handleLogout = () => {
     setUser(null);
     setUserType(null);
+    setToken(null);
+    localStorage.removeItem("servicepro_jwt_token");
     setPage("home");
   };
+
+  // On mount, restore login from token if present
+  useEffect(() => {
+    const storedToken = localStorage.getItem("servicepro_jwt_token");
+    if (storedToken) {
+      const decoded = decodeJwtPayload(storedToken);
+      if (decoded) {
+        setUser({ email: decoded.email, userId: decoded.userId });
+        setUserType(decoded.userType);
+        setToken(storedToken);
+      } else {
+        localStorage.removeItem("servicepro_jwt_token");
+      }
+    }
+  }, []);
 
   // Close modal on outside click
   useEffect(() => {
@@ -226,53 +270,44 @@ function App() {
     return () => window.removeEventListener("click", handleClick);
   }, [showLogin, showSignup, showBooking]);
 
-  // Load user from localStorage on mount
-  useEffect(() => {
-    const storedUser = localStorage.getItem("servicepro_user");
-    const storedUserType = localStorage.getItem("servicepro_userType");
-    const loginEmail = localStorage.getItem("servicepro_login_email");
-    const loginPasswordCipher = localStorage.getItem("servicepro_login_password");
-    if (storedUser && storedUserType) {
-      try {
-        const userObj = JSON.parse(storedUser);
-        setUser(userObj);
-        setUserType(storedUserType);
-      } catch {}
-    } else if (loginEmail && loginPasswordCipher) {
-      // Try auto-login with ciphered credentials
-      const loginPassword = decipher(loginPasswordCipher);
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
-      axios.post(`${backendUrl}/api/auth/login`, {
-        email: loginEmail,
-        password: loginPassword
-      })
-        .then(res => {
-          setUser({ email: loginEmail, userId: res.data.userId });
-          setUserType(res.data.userType);
-          toast.success("Auto-login successful!");
-        })
-        .catch(() => {
-          localStorage.removeItem("servicepro_login_email");
-          localStorage.removeItem("servicepro_login_password");
-        });
-    }
-  }, []);
-
-  // Save user to localStorage on login
-  useEffect(() => {
-    if (user && userType) {
-      localStorage.setItem("servicepro_user", JSON.stringify(user));
-      localStorage.setItem("servicepro_userType", userType);
-    } else {
-      localStorage.removeItem("servicepro_user");
-      localStorage.removeItem("servicepro_userType");
-    }
-  }, [user, userType]);
-
   // Render
   return (
     <>
       <ToastProvider />
+      {userType === "professional" && (
+        <ProfessionalDashboard user={user} onLogout={handleLogout} userType={userType} />
+      )}
+      {userType === "admin" && (
+        <AdminDashboard user={user} onLogout={handleLogout} userType={userType} />
+      )}
+      {(userType !== "professional" && userType !== "admin") && (
+        <CustomerDashboard
+          user={user}
+          onLogout={handleLogout}
+          showPage={showPage}
+          setShowLogin={setShowLogin}
+          setShowSignup={setShowSignup}
+          searchService={searchService}
+          setSearchService={setSearchService}
+          searchLocation={searchLocation}
+          setSearchLocation={setSearchLocation}
+          searchServices={searchServices}
+          filterProfessionals={filterProfessionals}
+          page={page}
+          filteredProfessionals={filteredProfessionals}
+          bookProfessional={bookProfessional}
+          showBooking={showBooking}
+          setShowBooking={setShowBooking}
+          bookingFormRef={bookingFormRef}
+          handleBookingSubmit={handleBookingSubmit}
+          bookingSuccess={bookingSuccess}
+          currentBookingProfessional={currentBookingProfessional}
+          showLogin={showLogin}
+          showSignup={showSignup}
+          userType={userType}
+        />
+      )}
+      {/* Modals and main site content for not-logged-in users */}
       {!user && (
         <>
           <Header
@@ -307,46 +342,17 @@ function App() {
             />
             <AboutPage page={page} />
           </main>
-          <LoginModal showLogin={showLogin} setShowLogin={setShowLogin} setUser={setUser} setUserType={setUserType} />
+          <LoginModal showLogin={showLogin} setShowLogin={setShowLogin} setUser={(u) => handleLoginSuccess(u, u.userType, u.token)} setUserType={setUserType} />
           <SignupModal showSignup={showSignup} setShowSignup={setShowSignup} />
-          <BookingModal          showBooking={showBooking}
-          setShowBooking={setShowBooking}
-          bookingFormRef={bookingFormRef}
-          handleBookingSubmit={handleBookingSubmit}
-          bookingSuccess={bookingSuccess}
-          currentBookingProfessional={currentBookingProfessional}
-        />
+          <BookingModal
+            showBooking={showBooking}
+            setShowBooking={setShowBooking}
+            bookingFormRef={bookingFormRef}
+            handleBookingSubmit={handleBookingSubmit}
+            bookingSuccess={bookingSuccess}
+            currentBookingProfessional={currentBookingProfessional}
+          />
         </>
-      )}
-      {user && userType === "customer" && (
-        <CustomerDashboard
-          user={user}
-          onLogout={handleLogout}
-          showPage={showPage}
-          setShowLogin={setShowLogin}
-          setShowSignup={setShowSignup}
-          searchService={searchService}
-          setSearchService={setSearchService}
-          searchLocation={searchLocation}
-          setSearchLocation={setSearchLocation}
-          searchServices={searchServices}
-          filterProfessionals={filterProfessionals}
-          page={page}
-          filteredProfessionals={filteredProfessionals}
-          bookProfessional={bookProfessional}
-          showBooking={showBooking}
-          setShowBooking={setShowBooking}
-          bookingFormRef={bookingFormRef}
-          handleBookingSubmit={handleBookingSubmit}
-          bookingSuccess={bookingSuccess}
-          currentBookingProfessional={currentBookingProfessional}
-          showLogin={showLogin}
-          showSignup={showSignup}
-          userType={userType}
-        />
-      )}
-      {user && userType === "professional" && (
-        <ProfessionalDashboard user={user} onLogout={handleLogout} userType={userType} />
       )}
     </>
   );

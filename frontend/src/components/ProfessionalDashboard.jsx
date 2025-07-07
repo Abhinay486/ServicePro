@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { User, Phone, MapPin, Star, Clock, Calendar, DollarSign, FileText, Users, LogOut, Settings, Home } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 // Styled Components
 const DashboardContainer = styled.div`
@@ -231,13 +232,22 @@ const LogoutButton = styled.button`
 
 const ProfessionalDashboard = ({ user, userType, onLogout }) => {
   const [bookings, setBookings] = useState([]);
+  const [pendingBookings, setPendingBookings] = useState([]);
+  const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
+  const getToken = () => localStorage.getItem('servicepro_jwt_token');
 
+  // Fetch all bookings
   const fetchBookings = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:3000/api/professionals/${user.userId}/bookings`);
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/professionals/${user.userId}/bookings`, {
+        headers: {
+          'Authorization': `Bearer ${getToken()}`,
+          'Content-Type': 'application/json',
+        },
+      });
       const data = await response.json();
       setBookings(data.bookings || []);
     } catch (error) {
@@ -247,16 +257,56 @@ const ProfessionalDashboard = ({ user, userType, onLogout }) => {
     setLoading(false);
   };
 
+  // Fetch pending bookings
+  const fetchPendingBookings = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/professionals/${user.userId}/pending-bookings`, {
+        headers: {
+          'Authorization': `Bearer ${getToken()}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await response.json();
+      setPendingBookings(data.bookings || []);
+    } catch (error) {
+      console.error('Error fetching pending bookings:', error);
+      setPendingBookings([]);
+    }
+  };
+
+  // Fetch professional profile
+  const fetchProfile = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/professionals/${user.userId}/profile`, {
+        headers: {
+          'Authorization': `Bearer ${getToken()}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await response.json();
+      setProfile(data.profile || data);
+      console.log(data);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      setProfile(null);
+    }
+  };
+
   useEffect(() => {
-    if (user?.userId) fetchBookings();
+    if (user?.userId) {
+      fetchBookings();
+      fetchPendingBookings();
+      fetchProfile();
+    }
   }, [user]);
 
   // Handle booking acceptance
   const handleAcceptBooking = async (bookingId) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/bookings/${bookingId}/accept`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/professionals/bookings/${bookingId}/accept`, {
         method: 'PATCH',
         headers: {
+          'Authorization': `Bearer ${getToken()}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -267,15 +317,16 @@ const ProfessionalDashboard = ({ user, userType, onLogout }) => {
       const data = await response.json();
 
       if (response.ok) {
-        alert('Booking accepted successfully!');
+        toast.success('Booking accepted successfully!');
         // Refresh bookings
         fetchBookings();
+        fetchPendingBookings();
       } else {
-        alert(data.error || 'Failed to accept booking');
+        toast.error(data.error || 'Failed to accept booking');
       }
     } catch (error) {
       console.error('Error accepting booking:', error);
-      alert('Failed to accept booking. Please try again.');
+      toast.error('Failed to accept booking. Please try again.');
     }
   };
 
@@ -284,9 +335,10 @@ const ProfessionalDashboard = ({ user, userType, onLogout }) => {
     const rejectionReason = prompt('Please provide a reason for rejection (optional):');
     
     try {
-      const response = await fetch(`http://localhost:3000/api/bookings/${bookingId}/reject`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/professionals/bookings/${bookingId}/reject`, {
         method: 'PATCH',
         headers: {
+          'Authorization': `Bearer ${getToken()}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -298,15 +350,16 @@ const ProfessionalDashboard = ({ user, userType, onLogout }) => {
       const data = await response.json();
 
       if (response.ok) {
-        alert('Booking rejected successfully.');
+        toast.success('Booking rejected successfully.');
         // Refresh bookings
         fetchBookings();
+        fetchPendingBookings();
       } else {
-        alert(data.error || 'Failed to reject booking');
+        toast.error(data.error || 'Failed to reject booking');
       }
     } catch (error) {
       console.error('Error rejecting booking:', error);
-      alert('Failed to reject booking. Please try again.');
+      toast.error('Failed to reject booking. Please try again.');
     }
   };
 
@@ -631,19 +684,19 @@ const ProfessionalDashboard = ({ user, userType, onLogout }) => {
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.75rem' }}>
               <User className="h-4 w-4 mr-2" style={{ color: '#4D6DE3' }} />
               <span style={{ color: '#393737', fontWeight: '500' }}>
-                {user?.name || user?.email || 'Professional'}
+                {profile?.name || user?.name || user?.email || 'Professional'}
               </span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.75rem' }}>
               <Phone className="h-4 w-4 mr-2" style={{ color: '#4D6DE3' }} />
               <span style={{ color: '#393737', opacity: 0.7 }}>
-                {user?.phone || 'Not provided'}
+                {profile?.phone || user?.phone || 'Not provided'}
               </span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <MapPin className="h-4 w-4 mr-2" style={{ color: '#4D6DE3' }} />
               <span style={{ color: '#393737', opacity: 0.7 }}>
-                {user?.location || 'Not provided'}
+                {profile?.location || user?.location || 'Not provided'}
               </span>
             </div>
           </div>

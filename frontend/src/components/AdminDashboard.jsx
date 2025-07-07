@@ -1,24 +1,34 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
 
-export const AdminDashboard = ({ user, onLogout, userType }) => {
+const AdminDashboard = ({ user, onLogout, userType }) => {
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [processingId, setProcessingId] = useState(null);
+    
+    // Helper to get JWT token from localStorage
+    const getToken = () => localStorage.getItem('servicepro_jwt_token');
 
-    // Fetch applications on component mount
+    // Fetch all applications on mount
     useEffect(() => {
         fetchApplications();
     }, []);
-
+    // Fetch all professional applications
     const fetchApplications = async () => {
         try {
             setLoading(true);
-            const response = await fetch('http://localhost:5000/api/admin/professional-applications');
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/professionals/applications`, {
+                headers: {
+                    'Authorization': `Bearer ${getToken()}`,
+                    'Content-Type': 'application/json',
+                },
+            });
             if (!response.ok) {
                 throw new Error('Failed to fetch applications');
             }
             const data = await response.json();
+            console.log('Fetched applications:', data);
             setApplications(data);
         } catch (err) {
             setError(err.message);
@@ -27,61 +37,56 @@ export const AdminDashboard = ({ user, onLogout, userType }) => {
         }
     };
 
+    // Approve application (PUT)
     const handleApprove = async (applicationId) => {
         try {
             setProcessingId(applicationId);
-            const response = await fetch(`http://localhost:5000/api/admin/professional-applications/${applicationId}/approve`, {
-                method: 'POST',
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/professionals/${applicationId}/approve`, {
+                method: 'PUT',
                 headers: {
+                    'Authorization': `Bearer ${getToken()}`,
                     'Content-Type': 'application/json',
                 },
             });
-            
             if (!response.ok) {
                 throw new Error('Failed to approve application');
             }
-            
             const result = await response.json();
-            
-            // Update local state
-            setApplications(applications.map(app => 
-                app._id === applicationId 
+            setApplications(applications.map(app =>
+                app._id === applicationId
                     ? { ...app, status: 'approved' }
                     : app
             ));
-            
-            alert(`Application approved! Default password: ${result.defaultPassword}`);
+            toast.success(`Application approved! Default password: ${result.defaultPassword}`);
         } catch (err) {
-            alert(`Error approving application: ${err.message}`);
+            toast.error(`Error approving application: ${err.message}`);
         } finally {
             setProcessingId(null);
         }
     };
 
+    // Reject application (DELETE)
     const handleReject = async (applicationId) => {
         try {
             setProcessingId(applicationId);
-            const response = await fetch(`http://localhost:5000/api/admin/professional-applications/${applicationId}/reject`, {
-                method: 'POST',
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/professionals/${applicationId}/reject`, {
+                method: 'DELETE',
                 headers: {
+                    'Authorization': `Bearer ${getToken()}`,
                     'Content-Type': 'application/json',
                 },
             });
-            
             if (!response.ok) {
                 throw new Error('Failed to reject application');
             }
-            
-            // Update local state
-            setApplications(applications.map(app => 
-                app._id === applicationId 
+            setApplications(applications.map(app =>
+                app._id === applicationId
                     ? { ...app, status: 'rejected' }
                     : app
             ));
-            
-            alert('Application rejected successfully');
+            toast.success('Application rejected successfully');
         } catch (err) {
-            alert(`Error rejecting application: ${err.message}`);
+            toast.error(`Error rejecting application: ${err.message}`);
         } finally {
             setProcessingId(null);
         }
@@ -107,12 +112,8 @@ export const AdminDashboard = ({ user, onLogout, userType }) => {
     };
 
     return (
-        <div className="admin-dashboard" style={{
-            padding: '2rem',
-            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-            background: '#f5f5f7',
-            minHeight: '100vh'
-        }}>
+        <>
+        <div style={{ padding: '2rem', fontFamily: 'sans-serif', background: '#f5f5f7', minHeight: '100vh' }}>
             <div style={{
                 maxWidth: '1200px',
                 margin: '0 auto',
@@ -121,26 +122,8 @@ export const AdminDashboard = ({ user, onLogout, userType }) => {
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
                 padding: '2rem'
             }}>
-                <h1 style={{
-                    fontSize: '2.5rem',
-                    fontWeight: '700',
-                    color: '#1d1d1f',
-                    marginBottom: '0.5rem',
-                    textAlign: 'center'
-                }}>Admin Dashboard</h1>
-                
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: '2rem'
-                }}>
-                    <p style={{
-                        fontSize: '1.1rem',
-                        color: '#86868b',
-                        margin: 0
-                    }}>Welcome back, {user?.name || 'Administrator'}!</p>
-                    
+                <h1 style={{ fontSize: '2.5rem', fontWeight: '700', color: '#1d1d1f', marginBottom: '0.5rem', textAlign: 'center' }}>Admin Dashboard</h1>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem' }}>
                     <button
                         onClick={onLogout}
                         style={{
@@ -154,21 +137,13 @@ export const AdminDashboard = ({ user, onLogout, userType }) => {
                             cursor: 'pointer',
                             transition: 'all 0.2s ease'
                         }}
-                        onMouseOver={(e) => e.target.style.background = '#e55a2b'}
-                        onMouseOut={(e) => e.target.style.background = '#ff6b35'}
+                        onMouseOver={e => e.target.style.background = '#e55a2b'}
+                        onMouseOut={e => e.target.style.background = '#ff6b35'}
                     >
                         Logout
                     </button>
                 </div>
                 
-                <p style={{
-                    fontSize: '1rem',
-                    color: '#86868b',
-                    textAlign: 'center',
-                    marginBottom: '2rem'
-                }}>Manage professional applications and system settings</p>
-
-                {/* Statistics */}
                 <div style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
@@ -417,5 +392,8 @@ export const AdminDashboard = ({ user, onLogout, userType }) => {
                 </div>
             </div>
         </div>
+        </>
     );
 }
+
+export default AdminDashboard;

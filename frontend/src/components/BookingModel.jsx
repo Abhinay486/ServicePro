@@ -1,6 +1,21 @@
 import React, { useState } from 'react'
 
-const BookingModel = ({ professionalId }) => {
+const BookingModel = ({
+  professionalId,
+  onSuccess,
+  bookingDate,
+  setBookingDate,
+  bookingTime,
+  setBookingTime,
+  serviceDetails,
+  setServiceDetails,
+  customerAddress,
+  setCustomerAddress,
+  loading,
+  error,
+  success,
+  onSubmit
+}) => {
   // Get today's date in YYYY-MM-DD format for minimum date
   const today = new Date().toISOString().split('T')[0];
 
@@ -18,6 +33,8 @@ const BookingModel = ({ professionalId }) => {
 
   return (
     <>
+      {error && <div style={{ color: 'red', marginBottom: 8 }}>{error}</div>}
+      {success && <div style={{ color: 'green', marginBottom: 8 }}>{success}</div>}
       <div className="form-group">
         <label htmlFor="bookingDate" style={{ color: '#393737', fontWeight: '500' }}>Preferred Date</label>
         <input 
@@ -26,6 +43,8 @@ const BookingModel = ({ professionalId }) => {
           name="bookingDate" 
           required 
           min={today}
+          value={bookingDate}
+          onChange={e => setBookingDate(e.target.value)}
           style={{
             border: '2px solid #C7EEFF',
             borderRadius: '12px',
@@ -35,8 +54,8 @@ const BookingModel = ({ professionalId }) => {
             color: '#393737',
             transition: 'all 0.3s ease'
           }}
-          onFocus={(e) => e.target.style.borderColor = '#4D6DE3'}
-          onBlur={(e) => e.target.style.borderColor = '#C7EEFF'}
+          onFocus={e => e.target.style.borderColor = '#4D6DE3'}
+          onBlur={e => e.target.style.borderColor = '#C7EEFF'}
         />
       </div>
       
@@ -48,6 +67,8 @@ const BookingModel = ({ professionalId }) => {
           id="bookingTime" 
           name="bookingTime" 
           required 
+          value={bookingTime}
+          onChange={e => setBookingTime(e.target.value)}
           style={{
             border: '2px solid #C7EEFF',
             borderRadius: '12px',
@@ -57,8 +78,8 @@ const BookingModel = ({ professionalId }) => {
             color: '#393737',
             transition: 'all 0.3s ease'
           }}
-          onFocus={(e) => e.target.style.borderColor = '#4D6DE3'}
-          onBlur={(e) => e.target.style.borderColor = '#C7EEFF'}
+          onFocus={e => e.target.style.borderColor = '#4D6DE3'}
+          onBlur={e => e.target.style.borderColor = '#C7EEFF'}
         >
           <option value="">Select time</option>
           {timeSlots.map(slot => (
@@ -77,6 +98,8 @@ const BookingModel = ({ professionalId }) => {
           rows="3" 
           placeholder="Describe what you need help with..."
           required
+          value={serviceDetails}
+          onChange={e => setServiceDetails(e.target.value)}
           style={{
             border: '2px solid #C7EEFF',
             borderRadius: '12px',
@@ -87,8 +110,8 @@ const BookingModel = ({ professionalId }) => {
             transition: 'all 0.3s ease',
             resize: 'vertical'
           }}
-          onFocus={(e) => e.target.style.borderColor = '#4D6DE3'}
-          onBlur={(e) => e.target.style.borderColor = '#C7EEFF'}
+          onFocus={e => e.target.style.borderColor = '#4D6DE3'}
+          onBlur={e => e.target.style.borderColor = '#C7EEFF'}
         ></textarea>
       </div>
       
@@ -100,6 +123,8 @@ const BookingModel = ({ professionalId }) => {
           rows="2" 
           required
           placeholder="Enter your full address where service is needed..."
+          value={customerAddress}
+          onChange={e => setCustomerAddress(e.target.value)}
           style={{
             border: '2px solid #C7EEFF',
             borderRadius: '12px',
@@ -110,30 +135,32 @@ const BookingModel = ({ professionalId }) => {
             transition: 'all 0.3s ease',
             resize: 'vertical'
           }}
-          onFocus={(e) => e.target.style.borderColor = '#4D6DE3'}
-          onBlur={(e) => e.target.style.borderColor = '#C7EEFF'}
+          onFocus={e => e.target.style.borderColor = '#4D6DE3'}
+          onBlur={e => e.target.style.borderColor = '#C7EEFF'}
         ></textarea>
       </div>
       
       <button 
-        type="submit" 
+        type="button"
         className="btn btn-primary" 
         style={{ 
           width: '100%',
-          background: '#4D6DE3',
+          background: loading ? '#A0A0A0' : '#4D6DE3',
           color: '#FFFFFF',
           border: 'none',
           padding: '0.875rem',
           borderRadius: '12px',
           fontSize: '1rem',
           fontWeight: '600',
-          cursor: 'pointer',
+          cursor: loading ? 'not-allowed' : 'pointer',
           transition: 'all 0.3s ease'
         }}
-        onMouseOver={(e) => e.target.style.background = '#393737'}
-        onMouseOut={(e) => e.target.style.background = '#4D6DE3'}
+        disabled={loading}
+        onClick={onSubmit}
+        onMouseOver={e => { if (!loading) e.target.style.background = '#393737'; }}
+        onMouseOut={e => { if (!loading) e.target.style.background = '#4D6DE3'; }}
       >
-        Send Booking Request
+        {loading ? 'Sending...' : 'Send Booking Request'}
       </button>
     </>
   )

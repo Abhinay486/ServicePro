@@ -11,18 +11,12 @@ const SignupModal = ({ showSignup, setShowSignup }) => {
     const name = form.signupName.value;
     const email = form.signupEmail.value;
     const password = form.signupPassword.value;
-    const userType = form.userType.value;
     const phone = form.signupPhone ? form.signupPhone.value : '';
     const address = form.signupAddress ? form.signupAddress.value : '';
 
-    if (userType !== 'customer') {
-      toast.error('Only customer signup is supported here.');
-      return;
-    }
-
     try {
       const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
-      const res = await axios.post(`${backendUrl}/api/customers/register`, {
+      const res = await axios.post(`${backendUrl}/api/auth/register`, {
         name,
         email,
         password,
@@ -156,28 +150,6 @@ const SignupModal = ({ showSignup, setShowSignup }) => {
               onFocus={(e) => e.target.style.borderColor = '#4D6DE3'}
               onBlur={(e) => e.target.style.borderColor = '#C7EEFF'}
             />
-          </div>
-          <div className="form-group">
-            <label htmlFor="userType" style={{ color: '#393737', fontWeight: '500' }}>I am a:</label>
-            <select 
-              id="userType" 
-              required 
-              style={{
-                border: '2px solid #C7EEFF',
-                borderRadius: '12px',
-                padding: '0.75rem',
-                fontSize: '1rem',
-                background: '#FFFFFF',
-                color: '#393737',
-                transition: 'all 0.3s ease'
-              }}
-              onFocus={(e) => e.target.style.borderColor = '#4D6DE3'}
-              onBlur={(e) => e.target.style.borderColor = '#C7EEFF'}
-            >
-              <option value="">Select user type</option>
-              <option value="customer">Customer</option>
-              <option value="professional">Professional</option>
-            </select>
           </div>
           <button 
             type="submit" 
